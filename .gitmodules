@@ -1,0 +1,9 @@
+[submodule "deps/closure"]
+	path = deps/closure
+	url = https://github.com/MobiusHorizons/closure_module.git
+[submodule "deps/stream"]
+	path = deps/stream
+	url = https://github.com/MobiusHorizons/stream_module.git
+[submodule "deps/net"]
+	path = deps/net
+	url = https://github.com/MobiusHorizons/net_module.git
