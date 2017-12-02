@@ -1,6 +1,7 @@
+import net      from "../net/net.module.c";
+import stream   from "../stream/stream.module.c";
+
 import url      from "./url.module.c";
-import net      from "../deps/net/net.module.c";
-import stream   from "../deps/stream/stream.module.c";
 import common   from "./common.module.c";
 
 #include <string.h>

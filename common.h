@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "../deps/stream/stream.h"
+#include "../stream/stream.h"
 
 enum common_verb {
   UNDEFINED_METHOD = 0,

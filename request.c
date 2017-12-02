@@ -1,6 +1,7 @@
+#include "../net/net.h"
+#include "../stream/stream.h"
+
 #include "./url.h"
-#include "../deps/net/net.h"
-#include "../deps/stream/stream.h"
 #include "./common.h"
 
 #include <string.h>

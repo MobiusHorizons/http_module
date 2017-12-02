@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#include "../deps/stream/stream.h"
+#include "../stream/stream.h"
 #include "./request.h"
 
 typedef struct {

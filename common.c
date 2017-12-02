@@ -3,8 +3,8 @@
 #include <stdbool.h>
 
 
-#include "../deps/stream/stream.h"
-#include "../deps/stream/file.h"
+#include "../stream/stream.h"
+#include "../stream/file.h"
 
 enum common_verb {
   UNDEFINED_METHOD = 0,

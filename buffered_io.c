@@ -2,29 +2,29 @@
 #include <stdlib.h>
 #include <string.h>
 
-import closure  from "../deps/closure/closure.module.c";
-import stream   from "../deps/stream/stream.module.c";
+#include "../closure/closure.h"
+#include "../stream/stream.h"
 static int _type;
 
-export int type() {
+int buffered_io_type() {
   if (_type == 0) {
-    _type = stream.register("file");
+    _type = stream_register("file");
   }
 
   return _type;
 }
 
-export typedef struct buffered_t Buffered;
+typedef struct buffered_t buffered_io_Buffered;
 struct buffered_t {
   char *      buffer;
   size_t      buffered;
   size_t      cursor;
-  stream.t * _wrapped;
-  closure.t free_fn;
+  stream_t * _wrapped;
+  closure_t free_fn;
 };
 
-static ssize_t read(void * ctx, void * buffer, size_t nbytes, stream.error_t * error) {
-  Buffered * b = (Buffered *) ctx;
+static ssize_t read(void * ctx, void * buffer, size_t nbytes, stream_error_t * error) {
+  buffered_io_Buffered * b = (buffered_io_Buffered *) ctx;
   ssize_t len = 0;
 
   if (b->buffer) {
@@ -36,13 +36,13 @@ static ssize_t read(void * ctx, void * buffer, size_t nbytes, stream.error_t * e
 
     if (b->cursor == b->buffered) {
       b->cursor = b->buffered = 0;
-      closure.call(b->free_fn, b->buffer);
+      closure_call(b->free_fn, b->buffer);
       b->buffer = NULL;
     }
   }
 
   if (nbytes > 0){
-    ssize_t err = stream.read(b->_wrapped, &buffer[len], nbytes);
+    ssize_t err = stream_read(b->_wrapped, &buffer[len], nbytes);
     if (err < 0 && error != NULL) {
       error->code    = b->_wrapped->error.code;
       error->message = b->_wrapped->error.message;
@@ -55,9 +55,9 @@ static ssize_t read(void * ctx, void * buffer, size_t nbytes, stream.error_t * e
 }
 
 // passthrough
-static ssize_t write(void * ctx, const void * buffer, size_t nbytes, stream.error_t * error) {
-  Buffered * b = (Buffered *) ctx;
-  ssize_t e = stream.write(b->_wrapped, buffer, nbytes);
+static ssize_t write(void * ctx, const void * buffer, size_t nbytes, stream_error_t * error) {
+  buffered_io_Buffered * b = (buffered_io_Buffered *) ctx;
+  ssize_t e = stream_write(b->_wrapped, buffer, nbytes);
   if (e < 0 && error != NULL) {
       error->code    = b->_wrapped->error.code;
       error->message = b->_wrapped->error.message;
@@ -66,33 +66,33 @@ static ssize_t write(void * ctx, const void * buffer, size_t nbytes, stream.erro
   return e;
 }
 
-static ssize_t close(void * ctx, stream.error_t * error) {
-  Buffered * b = (Buffered *) ctx;
+static ssize_t close(void * ctx, stream_error_t * error) {
+  buffered_io_Buffered * b = (buffered_io_Buffered *) ctx;
 
   if (b && b->buffered > 0){
-    closure.call(b->free_fn, b->buffer);
+    closure_call(b->free_fn, b->buffer);
   }
 
-  global.free(b);
+  free(b);
   return 0;
 }
 
-export stream.t * new(stream.t * _wrapped){
-  Buffered *b = malloc(sizeof(Buffered));
+stream_t * buffered_io_new(stream_t * _wrapped){
+  buffered_io_Buffered *b = malloc(sizeof(buffered_io_Buffered));
   b->_wrapped = _wrapped;
   b->cursor   = 0;
   b->buffered = 0;
   b->buffer   = NULL;
-  b->free_fn  = closure.new(NULL, NULL);
+  b->free_fn  = closure_new(NULL, NULL);
 
-  stream.t * s = malloc(sizeof(stream.t));
+  stream_t * s = malloc(sizeof(stream_t));
 
   s->ctx   = b;
   s->read  = read;
   s->write = write;
   s->pipe  = NULL;
   s->close = close;
-  s->type = type();
+  s->type = buffered_io_type();
 
   s->error.code    = 0;
   s->error.message = NULL;
@@ -100,9 +100,9 @@ export stream.t * new(stream.t * _wrapped){
   return s;
 }
 
-export size_t rewind(stream.t * s, void * buffer, size_t bytes, closure.t free_fn){
-  if (s->type == type()){
-    Buffered * b = (Buffered *) s->ctx;
+size_t buffered_io_rewind(stream_t * s, void * buffer, size_t bytes, closure_t free_fn){
+  if (s->type == buffered_io_type()){
+    buffered_io_Buffered * b = (buffered_io_Buffered *) s->ctx;
     if (b->buffer == NULL) {
       b->buffer   = buffer;
       b->free_fn  = free_fn;
@@ -115,9 +115,9 @@ export size_t rewind(stream.t * s, void * buffer, size_t bytes, closure.t free_f
   return -1;
 }
 
-export stream.t * wrapped(stream.t * s){
-  if (s->type == type()){
-    Buffered * b = (Buffered *) s->ctx;
+stream_t * buffered_io_wrapped(stream_t * s){
+  if (s->type == buffered_io_type()){
+    buffered_io_Buffered * b = (buffered_io_Buffered *) s->ctx;
     if (b) {
       return b->_wrapped;
     }

@@ -8,38 +8,38 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
-export {
+
 #include <stdbool.h>
-}
 
-import closure  from "../deps/closure/closure.module.c";
-import stream   from "../deps/stream/stream.module.c";
-import net      from "../deps/net/net.module.c";
 
-import url      from "./url.module.c";
-import buffered from "./buffered_io.module.c";
-import common   from "./common.module.c";
-import request  from "./request.module.c";
+#include "../closure/closure.h"
+#include "../stream/stream.h"
+#include "../net/net.h"
 
-export typedef struct {
+#include "./url.h"
+#include "./buffered_io.h"
+#include "./common.h"
+#include "./request.h"
+
+typedef struct {
   char **    headers;
   char *     headers_buf;
   size_t     num_headers;
   int        status;
   char *     status_message;
-  stream.t * body;
-} response_t;
+  stream_t * body;
+} response_response_t;
 
 static void * free_buffer(void * buffer, void * args){
   free(buffer);
   return NULL;
 }
 
-export response_t resolve(request.request_t req){
-  common.params_t p = req.params;
+response_response_t response_resolve(request_request_t req){
+  common_params_t p = req.params;
   int error;
-  stream.t * out  = buffered.new(req.conn);
-  response_t resp = {0};
+  stream_t * out  = buffered_io_new(req.conn);
+  response_response_t resp = {0};
   resp.body = out;
 
   char * headers_buf = NULL;
@@ -50,7 +50,7 @@ export response_t resolve(request.request_t req){
 
   bool done = false;
   while (!done){
-    ssize_t len = stream.read(out, buf, 4096);
+    ssize_t len = stream_read(out, buf, 4096);
     if (len < 0) {
       resp.status = -1;
       free(headers_buf);
@@ -80,7 +80,7 @@ export response_t resolve(request.request_t req){
     if (body){
       size_t skip = body - buf + 4;
 
-      buffered.rewind(out, &buf[skip], len - skip, closure.new(free_buffer, buf));
+      buffered_io_rewind(out, &buf[skip], len - skip, closure_new(free_buffer, buf));
       done = true;
     }
   }
@@ -112,15 +112,15 @@ export response_t resolve(request.request_t req){
   return resp;
 }
 
-export void close(response_t resp){
+void response_close(response_response_t resp){
   if (resp.num_headers > 0){
     free(resp.headers_buf);
     free(resp.headers);
   }
 
-  stream.t * conn = buffered.wrapped(resp.body);
-  if (conn) net.hangup(conn);
-  stream.close(resp.body);
+  stream_t * conn = buffered_io_wrapped(resp.body);
+  if (conn) net_hangup(conn);
+  stream_close(resp.body);
 
 }
 

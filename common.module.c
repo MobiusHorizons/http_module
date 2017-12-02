@@ -3,8 +3,8 @@ export {
 #include <stdbool.h>
 }
 
-import stream from "../deps/stream/stream.module.c";
-import file   from "../deps/stream/file.module.c";
+import stream from "../stream/stream.module.c";
+import file   from "../stream/file.module.c";
 
 export enum verb {
   UNDEFINED_METHOD = 0,

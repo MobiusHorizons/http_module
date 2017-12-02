@@ -1,8 +1,8 @@
 #ifndef _buffered_io_
 #define _buffered_io_
 
-#include "../deps/stream/stream.h"
-#include "../deps/closure/closure.h"
+#include "../stream/stream.h"
+#include "../closure/closure.h"
 
 int buffered_io_type();
 

@@ -3,7 +3,7 @@
 
 #include "./common.h"
 #include "./url.h"
-#include "../deps/stream/stream.h"
+#include "../stream/stream.h"
 
 typedef struct {
   common_params_t  params;
